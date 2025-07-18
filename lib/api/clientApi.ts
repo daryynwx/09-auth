@@ -5,7 +5,7 @@ import type {
 } from "../../types/note";
 import { toast } from "react-hot-toast";
 import { AuthRequest, LogInUser, User } from "@/types/user";
-import { nextServer } from "./api";
+import { nextServer } from "./api"; // baseURL уже включает /api, поэтому НЕ пишем /api/ в путях
 
 export interface ParamsTypes {
   page: number;
@@ -31,16 +31,10 @@ export async function fetchNotes(
       perPage,
     };
 
-    if (search?.trim()) {
-      params.search = search;
-    }
-    if (tag?.trim()) {
-      params.tag = tag;
-    }
+    if (search?.trim()) params.search = search;
+    if (tag?.trim()) params.tag = tag;
 
-    const res = await nextServer.get<FetchNotesValues>("/notes", {
-      params,
-    });
+    const res = await nextServer.get<FetchNotesValues>("/notes", { params });
     return res.data;
   } catch (error) {
     toast.error(error instanceof Error ? error.message : String(error));
@@ -48,19 +42,9 @@ export async function fetchNotes(
   }
 }
 
-export async function createNote({
-  title,
-  content,
-  tag,
-}: CreateNoteValues): Promise<Note | undefined> {
+export async function createNote(data: CreateNoteValues): Promise<Note | undefined> {
   try {
-    const params: CreateNoteValues = {
-      title,
-      content,
-      tag,
-    };
-
-    const res = await nextServer.post<Note>("/notes", params);
+    const res = await nextServer.post<Note>("/notes", data);
     return res.data;
   } catch (error) {
     toast.error(error instanceof Error ? error.message : String(error));
@@ -86,19 +70,20 @@ export async function fetchNoteById(id: string): Promise<Note | undefined> {
   }
 }
 
+// 🔧 УБРАЛ лишний /api
 export async function register(data: AuthRequest) {
-    const response = await nextServer.post<User>("/api/auth/register", data);
-    return response.data;
+  const response = await nextServer.post<User>("/auth/register", data);
+  return response.data;
 }
 
 export async function login(data: AuthRequest) {
-  const response = await nextServer.post<LogInUser>("/api/auth/login", data);
+  const response = await nextServer.post<LogInUser>("/auth/login", data);
   return response.data;
 }
 
 export async function logout() {
   try {
-    await nextServer.post("/api/auth/logout");
+    await nextServer.post("/auth/logout");
   } catch (error) {
     toast.error(error instanceof Error ? error.message : String(error));
     throw error;
@@ -107,7 +92,7 @@ export async function logout() {
 
 export async function session() {
   try {
-    await nextServer.get("/api/auth/session");
+    await nextServer.get("/auth/session");
   } catch (error) {
     toast.error(error instanceof Error ? error.message : String(error));
     throw error;
