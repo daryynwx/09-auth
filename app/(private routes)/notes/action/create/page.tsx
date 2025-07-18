@@ -1,46 +1,40 @@
-import NoteForm from "@/components/NoteForm/NoteForm";
-import css from "./page.module.css";
-import type { Metadata } from "next";
+import { Metadata } from "next";
+
+import css from "./CreateNote.module.css";
+import NoteForm from "../../../../../components/NoteForm/NoteForm";
+
+// SEO CONFIG
 
 export const metadata: Metadata = {
-  title: "Create note",
-  description: "Create a new note with title, content, and tags.",
+  title: `NoteHub | Create notes`,
+  description: "NoteHub Create note",
   openGraph: {
-    title: "Create note",
-    description: "Create a new note with title, content, and tags.",
-    url: "https://09-auth-xi.vercel.app/notes/action/create",
+    title: `NoteHub | Create`,
+    description: "NoteHub | Create note",
+    url: `https://notehub.com/notes/action/create`,
+    siteName: "NoteHub | Create",
     images: [
       {
-        url: "https://ac.goit.global/fullstack/react/notehub-og-meta.jpg",
+        url: "https://ac.goit.global/fullstack/react/og-meta.jpg",
         width: 1200,
         height: 630,
-        alt: "notehub image",
+        alt: "Note App image",
       },
     ],
     type: "article",
   },
-  twitter: {
-    card: "summary_large_image",
-    title: "NoteHub",
-    description: "Take and organize notes easily with tags and instant search.",
-    images: [
-      {
-        url: "https://ac.goit.global/fullstack/react/notehub-og-meta.jpg",
-        width: 1200,
-        height: 630,
-        alt: "notehub image",
-      },
-    ],
-  },
 };
 
-export default function CreateNote() {
+const CreateNote = () => {
   return (
     <main className={css.main}>
       <div className={css.container}>
         <h1 className={css.title}>Create note</h1>
+
         <NoteForm />
       </div>
     </main>
   );
-}
+};
+
+export default CreateNote;
