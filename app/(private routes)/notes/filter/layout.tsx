@@ -3,7 +3,7 @@ type Props = {
   sidebar: React.ReactNode;
 };
 
-import css from "./LayoutNotes.module.css";
+import css from "./layout.module.css";
 
 const NotesLayout = ({ children, sidebar }: Props) => {
   return (
