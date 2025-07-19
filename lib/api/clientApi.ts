@@ -93,8 +93,27 @@ export async function register(data: AuthRequest) {
 
 export async function login(data: AuthRequest) {
   const response = await nextServer.post<LogInUser>("/auth/login", data);
+
+  // 💾 Сохраняем токен в localStorage
+  if (response.data.accessToken) {
+    localStorage.setItem("accessToken", response.data.accessToken);
+  }
+
   return response.data;
 }
+
+export async function getMe() {
+  const token = localStorage.getItem("accessToken");
+
+  const res = await nextServer.get<LogInUser>("/users/me", {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  return res.data;
+}
+
 
 export async function logout() {
   try {
@@ -114,14 +133,14 @@ export async function session() {
   }
 }
 
-export async function getMe() {
-  try {
-    const res = await nextServer.get<LogInUser>("/users/me");
-    return res.data;
-  } catch (error) {
-    throw error;
-  }
-}
+// export async function getMe() {
+//   try {
+//     const res = await nextServer.get<LogInUser>("/users/me");
+//     return res.data;
+//   } catch (error) {
+//     throw error;
+//   }
+// }
 
 export async function updateMe({ username }: UpdateMeRequest) {
   try {
