@@ -1,153 +1,80 @@
-import type {
-  CreateNoteValues,
-  FetchNotesValues,
-  Note,
-} from "../../types/note";
-import { toast } from "react-hot-toast";
-import { AuthRequest, LogInUser, User } from "@/types/user";
 import { nextServer } from "./api";
+import { Note } from "@/types/note";
+import { NewNote } from "@/types/note";
+import { Tag } from "@/types/note";
+import { LoginRequest, RegisterRequest, UpdateUserRequest, User } from "@/types/user";
+import { NotesHttpResponse } from "@/types/note";
 
-export interface ParamsTypes {
-  page: number;
-  perPage: number;
-  search?: string;
-  tag?: string;
-}
+export const fetchNotes = async(
+    query?: string, 
+    page: number = 1, 
+    tag?: Tag | undefined
+): Promise<NotesHttpResponse> => { 
+    const parameters = new URLSearchParams({
+        ...(query !=='' ? {search: query} : {}),
+        ...(tag !== undefined  ? {tag} : {}),
+        page: page.toString() ,
+    })
+    const response = await nextServer.get<NotesHttpResponse>(
+        '/notes', {
+        params: parameters,
+        });
+    return response.data;
+};
 
-export interface UpdateMeRequest {
-  username: string;
-}
+export const createNote = async(newNote: NewNote): Promise<Note> => {
+    const response = await nextServer.post<Note>(`/notes`, newNote);
+    return response.data;
+};
 
-export async function fetchNotes(
-  search: string,
-  page: number,
-  tag: string | undefined
-): Promise<FetchNotesValues | undefined> {
-  try {
-    const perPage = 12;
-    const params: ParamsTypes = {
-      tag,
-      page,
-      perPage,
-    };
+export const deleteNote = async(id: string): Promise<Note> => {
+    const response = await nextServer.delete<Note>(`/notes/${id}`
+    );
+    return response.data;
+};
 
-    if (search?.trim()) {
-      params.search = search;
+export const fetchNoteById = async(id: string): Promise<Note> => {
+    const response = await nextServer.get<Note>(`/notes/${id}`);
+return  response.data;
+};
+
+export const tags: Tag[] = ['Todo', 'Work', 'Personal', 'Meeting', 'Shopping'];
+
+export const register = async (data: RegisterRequest) => {
+    const response = await nextServer.post<User>('/auth/register', data);
+    return response.data;
+};
+
+export const login = async (data: LoginRequest) => {
+    const response = await nextServer.post<User>('/auth/login', data);
+    return response.data;
+};
+
+type CheckSessionRequest = {
+    success: boolean;
+};
+
+export const checkSession = async (): Promise<boolean> => {
+    try {
+        const response = await nextServer.get<User>('/api/users/me');
+        return Boolean(response.data); 
+    } catch (error) {
+        return false;
     }
-    if (tag?.trim()) {
-      params.tag = tag;
-    }
-
-    const res = await nextServer.get<FetchNotesValues>("/notes", {
-      params,
-    });
-    return res.data;
-  } catch (error) {
-    toast.error(error instanceof Error ? error.message : String(error));
-    throw error;
-  }
-}
-
-export async function createNote({
-  title,
-  content,
-  tag,
-}: CreateNoteValues): Promise<Note | undefined> {
-  try {
-    const params: CreateNoteValues = {
-      title,
-      content,
-      tag,
-    };
-
-    const res = await nextServer.post<Note>("/notes", params);
-    return res.data;
-  } catch (error) {
-    toast.error(error instanceof Error ? error.message : String(error));
-  }
-}
-
-export async function deleteNote(id: string): Promise<Note | undefined> {
-  try {
-    const res = await nextServer.delete<Note>(`/notes/${id}`);
-    return res.data;
-  } catch (error) {
-    toast.error(error instanceof Error ? error.message : String(error));
-  }
-}
-
-export async function fetchNoteById(id: string): Promise<Note | undefined> {
-  try {
-    const res = await nextServer.get<Note>(`/notes/${id}`);
-    return res.data;
-  } catch (error) {
-    toast.error(error instanceof Error ? error.message : String(error));
-    throw error;
-  }
-}
-
-export async function register(data: AuthRequest) {
-  const response = await nextServer.post<User>("/auth/register", data);
-  return response.data;
-}
-
-export async function login(data: AuthRequest) {
-  const response = await nextServer.post<LogInUser>("/auth/login", data);
-
-  if (typeof window !== "undefined" && response.data.accessToken) {
-    localStorage.setItem("accessToken", response.data.accessToken);
-  }
-
-  return response.data;
-}
+};
 
 
-export async function getMe() {
-  const token = localStorage.getItem("accessToken");
+export const getMe = async () => {
+    const { data } = await nextServer.get<User>('/users/me');
+    return data;
+};
 
-  const res = await nextServer.get<LogInUser>("/users/me", {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
-
-  return res.data;
-}
+export const logout = async (): Promise<void> => {
+    await nextServer.post('/auth/logout')
+};
 
 
-export async function logout() {
-  try {
-    await nextServer.post("/auth/logout");
-  } catch (error) {
-    toast.error(error instanceof Error ? error.message : String(error));
-    throw error;
-  }
-}
-
-export async function session() {
-  try {
-    await nextServer.get("/auth/session");
-  } catch (error) {
-    toast.error(error instanceof Error ? error.message : String(error));
-    throw error;
-  }
-}
-
-// export async function getMe() {
-//   try {
-//     const res = await nextServer.get<LogInUser>("/users/me");
-//     return res.data;
-//   } catch (error) {
-//     throw error;
-//   }
-// }
-
-export async function updateMe({ username }: UpdateMeRequest) {
-  try {
-    const res = await nextServer.patch<LogInUser>("/users/me", { username });
-    return res.data;
-  } catch (error) {
-    toast.error(error instanceof Error ? error.message : String(error));
-    throw error;
-  }
+export const updateMe = async (payload: UpdateUserRequest) => {
+    const response = await nextServer.patch<User>('/users/me', payload);
+    return response.data;
 }

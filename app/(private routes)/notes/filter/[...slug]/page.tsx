@@ -1,63 +1,50 @@
-import NotesClient from "./Notes.client";
-import { Metadata } from "next";
-import { fetchServerNotes } from "@/lib/api/serverApi";
+import { fetchNotesServer } from '@/lib/api/serverApi';
+import NotesClient from './Notes.client';
+import { Tag } from '@/types/note';
+import { Metadata } from 'next';
 
-interface NotesProps {
+type Props = {
   params: Promise<{ slug: string[] }>;
 }
 
-export async function generateMetadata({
-  params,
-}: NotesProps): Promise<Metadata> {
+export async function generateMetadata({ params }:Props): Promise<Metadata> {
   const { slug } = await params;
-  const tag = slug[0] === "all" ? undefined : slug[0];
+  const tag = slug[0] as Tag;
   return {
-    title: `Notes: ${tag ? `${tag}` : "all"}`,
-    description: `Note: ${tag || "all"} — created in Notehub.`,
+    title: `${tag} notes`,
+    description: slug[0] === 'all'
+     ? "Browse all notes available in Note Hub — your space for organized ideas, productivity boosts, and smart information capture. Discover insights across all topics." 
+     : `Explore all notes tagged with "${tag}" in Note Hub — find insights, inspiration, and detailed information curated under this specific theme.`,
     openGraph: {
-      title: `Notes: ${tag ? `${tag}` : "all"}`,
-      description: `Note: ${tag || "all"} — created in Notehub.`,
-      url: `https://09-auth-xi.vercel.app/notes/filter/${slug.join("/")}`,
+      title: `${tag} notes`,
+      description: slug[0] === 'all' ? "All notes in Note Hub" : `All notes with tag ${tag}`,
+      url: slug[0] === 'all' ? `https://08-zustand-eypfyygwr-yelyzaveta-musianovychs-projects.vercel.app/notes/filter/all`: `https://08-zustand-eypfyygwr-yelyzaveta-musianovychs-projects.vercel.app/notes/filter/${tag}`,
       images: [
         {
           url: "https://ac.goit.global/fullstack/react/notehub-og-meta.jpg",
           width: 1200,
           height: 630,
-          alt: "notehub image",
+          alt: slug[0] === 'all'
+      ? "All notes collection preview in Note Hub"
+      : `Notes tagged with ${tag} - Note Hub preview image`,
         },
       ],
-    },
-    twitter: {
-      card: "summary_large_image",
-      title: `Notes: ${tag ? `${tag}` : "all"}`,
-      description: `Note: ${tag || "all"} — created in Notehub.`,
-      images: [
-        {
-          url: "https://ac.goit.global/fullstack/react/notehub-og-meta.jpg",
-          width: 1200,
-          height: 630,
-          alt: "notehub image",
-        },
-      ],
-    },
-  };
+    }
+  }
 }
 
-export const revalidate = 60;
-
-export default async function Notes({ params }: NotesProps) {
-  const initialQuery = "";
+export default async function Notes({ params }: Props) {
+  const initialQuery = '';
   const initialPage = 1;
   const { slug } = await params;
-  const tag = slug[0] === "all" ? undefined : slug[0];
-  const data = await fetchServerNotes(initialQuery, initialPage, tag);
+  const tag = slug[0] === 'all' ? undefined : slug[0] as Tag;
+  const notes = await fetchNotesServer(initialQuery, initialPage, tag);
 
   return (
-    <NotesClient
+      <NotesClient 
       initialQuery={initialQuery}
       initialPage={initialPage}
       initialTag={tag}
-      initialData={data}
-    />
-  );
+      initialNotes={notes} />
+  )
 }

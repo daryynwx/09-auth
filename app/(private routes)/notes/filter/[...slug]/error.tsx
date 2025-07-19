@@ -1,16 +1,11 @@
-"use client";
+'use client';
 
-import css from "./error.module.css";
+type Props = {
+    error: Error;
+};
 
-interface ErrorMessageProps {
-  error: Error;
+const Error = ({error}: Props) => {
+    return <p>Could not fetch the list of notes. {error.message}</p>
 }
 
-export default function ErrorMessage({ error }: ErrorMessageProps) {
-  return (
-    <div className={css.error}>
-      <strong>⚠️ Error</strong>
-      <p>{error.message}</p>
-    </div>
-  );
-}
+export default Error;

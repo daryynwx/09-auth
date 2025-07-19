@@ -1,7 +1,7 @@
-import SidebarNotes from "@/components/SidebarNotes/SidebarNotes";
+import SideBarNotes from "@/components/SideBarNotes/SideBarNotes";
 
-const arrayTags: string[] = ["Work", "Personal", "Meeting", "Shopping", "Todo"];
-
-export default function Sidebar() {
-  return <SidebarNotes tags={arrayTags} />;
+const NotesSidebar = async () => {
+    return <SideBarNotes />
 }
+
+export default NotesSidebar

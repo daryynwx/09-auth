@@ -1,63 +1,45 @@
-import {
-  dehydrate,
-  HydrationBoundary,
-  QueryClient,
-} from "@tanstack/react-query";
+import { QueryClient, HydrationBoundary, dehydrate } from "@tanstack/react-query";
 import NoteDetailsClient from "./NoteDetails.client";
 import { Metadata } from "next";
-import fetchServerNoteById from "@/lib/api/serverApi";
+import { fetchNoteByIdServer } from "@/lib/api/serverApi";
 
-interface NoteDetailsProps {
-  params: Promise<{ id: string }>;
-}
+type Props = {
+    params: Promise<{ id: string }>;
+};
 
-export async function generateMetadata({
-  params,
-}: NoteDetailsProps): Promise<Metadata> {
+export async function generateMetadata({ params }:Props): Promise<Metadata> {
   const { id } = await params;
-  const res = await fetchServerNoteById(id);
-  return {
-    title: `Note Details: ${res?.title}`,
-    description: res?.content.slice(0, 30),
+  const note = await fetchNoteByIdServer(id);
+    return {
+    title: `Note: ${note.title}`,
+    description: note.content.slice(0, 30),
     openGraph: {
-      title: `Note Details: ${res?.title}`,
-      description: res?.content.slice(0, 30),
-      url: `https://09-auth-xi.vercel.app/notes/${res?.id}`,
+      title: `Note: ${note.title}`,
+      description: note.content.slice(0, 20),
+      url: `https://08-zustand-eypfyygwr-yelyzaveta-musianovychs-projects.vercel.app/notes/${id}`,
       images: [
         {
           url: "https://ac.goit.global/fullstack/react/notehub-og-meta.jpg",
           width: 1200,
           height: 630,
-          alt: "notehub image",
+          alt: note.title,
         },
       ],
-    },
-    twitter: {
-      card: "summary_large_image",
-      title: `Note Details: ${res?.title}`,
-      description: res?.content.slice(0, 30),
-      images: [
-        {
-          url: "https://ac.goit.global/fullstack/react/notehub-og-meta.jpg",
-          width: 1200,
-          height: 630,
-          alt: "notehub image",
-        },
-      ],
-    },
-  };
+    }
+  }
 }
 
-export default async function NoteDetails({ params }: NoteDetailsProps) {
-  const { id } = await params;
-  const queryClient = new QueryClient();
-  await queryClient.prefetchQuery({
-    queryKey: ["note", id],
-    queryFn: () => fetchServerNoteById(id),
-  });
-  return (
+export default async function NoteDetails({params}: Props) {
+    const { id } = await params;
+    const queryClient = new QueryClient();
+
+    await queryClient.prefetchQuery({
+        queryKey: ['note', id],
+        queryFn: () => fetchNoteByIdServer(id),
+    });
+    return (
     <HydrationBoundary state={dehydrate(queryClient)}>
-      <NoteDetailsClient />
+        <NoteDetailsClient /> 
     </HydrationBoundary>
-  );
+    );
 }

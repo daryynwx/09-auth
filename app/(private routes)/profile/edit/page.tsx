@@ -1,101 +1,84 @@
-"use client";
+'use client';
 
-import React, { useEffect, useState } from "react";
-import css from "./EditProfilePage.module.css";
-import { getMe, updateMe } from "@/lib/api/clientApi";
-import Image from "next/image";
+import css from './EditeProfilePage.module.css';
+import { updateMe } from "@/lib/api/clientApi";
 import { useRouter } from "next/navigation";
-import { useAuthUser } from "@/lib/store/authStore";
+import {  useState } from "react";
+import Image from "next/image";
+import { useAuthStore } from '@/lib/store/authStore';
+import { UpdateUserRequest } from '@/types/user';
 
-export default function EditProfilePage() {
-  const router = useRouter();
+const EditProfile = () => {
+    const router = useRouter();
+    const { user, setUser } = useAuthStore();
+    const [error, setError] = useState<boolean>(false);
 
-  const [userName, setUserName] = useState("");
-  const [userEmail, setUserEmail] = useState("");
-  const [userImage, setUserImage] = useState<string | null>(null);
-
-  const [error, setError] = useState("");
-
-  const setUser = useAuthUser((state) => state.setUser);
-
-  useEffect(() => {
-    async function fetchMe() {
+    const handleChange = async(formData: FormData) => {
       try {
-        const user = await getMe();
-        setUserName(user.username);
-        setUserEmail(user.email);
-        setUserImage(user.avatar?.trim() || null);
-      } catch (error) {
-        setError("Failed to load user data.");
+        const username = Object.fromEntries(formData) as UpdateUserRequest;
+
+        const updateUser = await updateMe(username);
+
+        if (updateUser) {
+          setUser(updateUser);
+          router.push('/profile');
+        }
+      } catch(error) {
+        console.log(error);
+        setError(true);
       }
+    };
+
+    const handleCancel = () => {
+        router.back();
+    };
+
+    return (
+        <main className={css.mainContent}>
+  <div className={css.profileCard}>
+    <h1 className={css.formTitle}>Edit Profile</h1>
+
+    {user && <Image 
+      src={user?.avatar}
+      alt="User Avatar"
+      width={120}
+      height={120}
+      className={css.avatar}
+    />
     }
 
-    fetchMe();
-  }, []);
-
-  function handleChange(event: React.ChangeEvent<HTMLInputElement>) {
-    setUserName(event.target.value);
-  }
-
-  async function handleSave(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    try {
-      const res = await updateMe({ username: userName });
-      setUser(res);
-      router.push("/profile");
-    } catch (error) {
-      setError("Failed to update profile.");
-    }
-  }
-
-  return (
-    <main className={css.mainContent}>
-      <div className={css.profileCard}>
-        <h1 className={css.formTitle}>Edit Profile</h1>
-
-        {userImage ? (
-          <Image
-            src={userImage}
-            alt="User Avatar"
-            width={120}
-            height={120}
-            className={css.avatar}
-          />
-        ) : (
-          <div className={css.placeholderAvatar}>No Avatar</div>
-        )}
-
-        <form className={css.profileInfo} onSubmit={handleSave}>
-          <div className={css.usernameWrapper}>
-            <label htmlFor="username">Username:</label>
-            <input
-              id="username"
-              name="username"
-              type="text"
-              className={css.input}
-              value={userName}
-              onChange={handleChange}
-            />
-          </div>
-
-          <p>Email: {userEmail}</p>
-
-          {error && <p className={css.error}>{error}</p>}
-
-          <div className={css.actions}>
-            <button type="submit" className={css.saveButton}>
-              Save
-            </button>
-            <button
-              type="button"
-              className={css.cancelButton}
-              onClick={router.back}
-            >
-              Cancel
-            </button>
-          </div>
-        </form>
+    <form className={css.profileInfo} 
+    onSubmit={async (e) => {
+      e.preventDefault();
+      const formData = new FormData(e.currentTarget);
+      await handleChange(formData);
+    }}>
+      <div className={css.usernameWrapper}>
+        <label htmlFor="username">Username:</label>
+        <input id="username"
+          name='username'
+          type="text"
+          defaultValue={user?.username}
+          className={css.input}
+        />
       </div>
-    </main>
-  );
-}
+
+      <p>Email: {user?.email}</p>
+
+      {error && <p className={css.error}>Failed to update profile data. Please try again later.</p>}
+
+      <div className={css.actions}>
+        <button type="submit" className={css.saveButton}>
+          Save
+        </button>
+        <button type="button" className={css.cancelButton} onClick={handleCancel}>
+          Cancel
+        </button>
+      </div>
+    </form>
+  </div>
+</main>
+    )
+};
+
+export default EditProfile;

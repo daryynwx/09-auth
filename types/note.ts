@@ -1,21 +1,21 @@
 export interface Note {
-  id: string;
-  title: string;
-  content: string;
-  tag: Tag;
-  createdAt: string;
-  updatedAt: string;
-}
+    id: string;
+    title: string;
+    content: string;
+    tag: string;
+    createdAt: string;
+    updatedAt: string
+};
 
-export interface CreateNoteValues {
-  title: string;
-  content?: string;
-  tag: Tag;
-}
+export type NewNote = {
+    title: string;
+    content: string;
+    tag: 'Todo' | 'Work' | 'Personal' | 'Meeting' | 'Shopping';
+};
 
-export type Tag = "Work" | "Personal" | "Meeting" | "Shopping" | "Todo";
+export type Tag = 'Todo' | 'Work' | 'Personal' | 'Meeting' | 'Shopping';
 
-export interface FetchNotesValues {
-  notes: Note[];
-  totalPages: number;
+export interface NotesHttpResponse {
+    notes: Note[];
+    totalPages: number;
 }
