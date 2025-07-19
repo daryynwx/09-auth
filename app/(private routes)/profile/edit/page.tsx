@@ -12,7 +12,7 @@ export default function EditProfilePage() {
 
   const [userName, setUserName] = useState("");
   const [userEmail, setUserEmail] = useState("");
-  const [userImage, setUserImage] = useState("");
+  const [userImage, setUserImage] = useState<string | null>(null);
 
   const [error, setError] = useState("");
 
@@ -20,12 +20,16 @@ export default function EditProfilePage() {
 
   useEffect(() => {
     async function fetchMe() {
-      await getMe().then((user) => {
+      try {
+        const user = await getMe();
         setUserName(user.username);
         setUserEmail(user.email);
-        setUserImage(user.avatar ?? "");
-      });
+        setUserImage(user.avatar?.trim() || null);
+      } catch (error) {
+        setError("Failed to load user data.");
+      }
     }
+
     fetchMe();
   }, []);
 
@@ -40,7 +44,7 @@ export default function EditProfilePage() {
       setUser(res);
       router.push("/profile");
     } catch (error) {
-      setError(String(error));
+      setError("Failed to update profile.");
     }
   }
 
@@ -49,13 +53,17 @@ export default function EditProfilePage() {
       <div className={css.profileCard}>
         <h1 className={css.formTitle}>Edit Profile</h1>
 
-        <Image
-          src={userImage}
-          alt="User Avatar"
-          width={120}
-          height={120}
-          className={css.avatar}
-        />
+        {userImage ? (
+          <Image
+            src={userImage}
+            alt="User Avatar"
+            width={120}
+            height={120}
+            className={css.avatar}
+          />
+        ) : (
+          <div className={css.placeholderAvatar}>No Avatar</div>
+        )}
 
         <form className={css.profileInfo} onSubmit={handleSave}>
           <div className={css.usernameWrapper}>

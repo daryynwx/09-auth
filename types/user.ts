@@ -4,9 +4,11 @@ export interface User {
 }
 
 export interface LogInUser {
+    accessToken: string;
   username: string;
   email: string;
-  avatar: string;
+    avatar: string;
+    
 }
 
 export interface AuthRequest {
