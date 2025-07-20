@@ -55,18 +55,15 @@ type CheckSessionRequest = {
 };
 
 export const checkSession = async (): Promise<boolean> => {
-    try {
-        const response = await nextServer.get<User>('/api/users/me');
-        return Boolean(response.data); 
-    } catch (error) {
-        return false;
-    }
+        const response = await nextServer.get<CheckSessionRequest>('/auth/session');
+        return Boolean(response.data.success); 
+    
 };
 
 
-export const getMe = async () => {
-    const { data } = await nextServer.get<User>('/users/me');
-    return data;
+export const getMe = async (): Promise<User> => {
+  const res = await nextServer.get("/users/me");
+  return res.data;
 };
 
 export const logout = async (): Promise<void> => {

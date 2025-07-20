@@ -1,6 +1,6 @@
 'use client';
 
-import css from './EditeProfilePage.module.css';
+import css from './EditProfilePage.module.css';
 import { updateMe } from "@/lib/api/clientApi";
 import { useRouter } from "next/navigation";
 import {  useState } from "react";

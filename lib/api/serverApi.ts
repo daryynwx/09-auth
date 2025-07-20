@@ -47,11 +47,11 @@ export const checkServerSession = async () => {
 
 export const getServerMe = async (): Promise<User> => {
     const cookieStore = await cookies();
-    const { data } = await nextServer.get('/notes/user/me',{
+    const { data } = await nextServer.get('/users/me', {
         headers: {
             Cookie: cookieStore.toString(),
         },
     });
     return data;
-};
+}
 
