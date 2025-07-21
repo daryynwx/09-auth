@@ -1,4 +1,4 @@
-import css from './SideBarNotes.module.css'
+import css from './SidebarNotes.module.css'
 import Link from 'next/link';
 import { tags } from '@/lib/api/clientApi';
 
